@@ -11,8 +11,10 @@ namespace Chess.Model.Rule
     using Chess.Model.Game;
     using Chess.Model.Piece;
     using Chess.Model.Visitor;
+    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
+    using System.Diagnostics;
     using System.Linq;
 
     /// <summary>
@@ -35,6 +37,8 @@ namespace Chess.Model.Rule
         /// </summary>
         private readonly MovementRule movementRule;
 
+        private static bool isChess960;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="StandardRulebook"/> class.
         /// </summary>
@@ -50,22 +54,65 @@ namespace Chess.Model.Rule
             this.endRule = new EndRule(this.checkRule, this.movementRule);
         }
 
+        public bool Chess960False()
+        {
+            return isChess960 = false;
+        } 
+        public bool Chess960True()
+        {
+            return isChess960 = true;
+        }
+
         /// <summary>
         /// Creates a new chess game according to the standard rulebook.
         /// </summary>
         /// <returns>The newly created chess game.</returns>
         public ChessGame CreateGame()
         {
+            Debug.WriteLine(isChess960);
+
             IEnumerable<PlacedPiece> makeBaseLine(int row, Color color)
             {
-                yield return new PlacedPiece(new Position(row, 0), new Rook(color));
-                yield return new PlacedPiece(new Position(row, 1), new Knight(color));
-                yield return new PlacedPiece(new Position(row, 2), new Bishop(color));
-                yield return new PlacedPiece(new Position(row, 3), new Queen(color));
-                yield return new PlacedPiece(new Position(row, 4), new King(color));
-                yield return new PlacedPiece(new Position(row, 5), new Bishop(color));
-                yield return new PlacedPiece(new Position(row, 6), new Knight(color));
-                yield return new PlacedPiece(new Position(row, 7), new Rook(color));
+                Random ran = new Random();
+
+                List<int> arr = new List<int>();
+
+                int randomNum;
+
+                if (isChess960)
+                {
+                    for (int i = 0; i <= 7; i++)
+                    {
+                        do
+                        {
+                            randomNum = ran.Next(0, 8);
+                        } while (arr.Contains(randomNum));
+
+                        arr.Add(randomNum);
+                    }
+
+                    yield return new PlacedPiece(new Position(row, arr[0]), new Rook(color));
+                    yield return new PlacedPiece(new Position(row, arr[1]), new Knight(color));
+                    yield return new PlacedPiece(new Position(row, arr[2]), new Bishop(color));
+                    yield return new PlacedPiece(new Position(row, arr[3]), new Queen(color));
+                    yield return new PlacedPiece(new Position(row, arr[4]), new King(color));
+                    yield return new PlacedPiece(new Position(row, arr[5]), new Bishop(color));
+                    yield return new PlacedPiece(new Position(row, arr[6]), new Knight(color));
+                    yield return new PlacedPiece(new Position(row, arr[7]), new Rook(color));
+                }else if (!isChess960)
+                {
+                    yield return new PlacedPiece(new Position(row, 0), new Rook(color));
+                    yield return new PlacedPiece(new Position(row, 1), new Knight(color));
+                    yield return new PlacedPiece(new Position(row, 2), new Bishop(color));
+                    yield return new PlacedPiece(new Position(row, 3), new Queen(color));
+                    yield return new PlacedPiece(new Position(row, 4), new King(color));
+                    yield return new PlacedPiece(new Position(row, 5), new Bishop(color));
+                    yield return new PlacedPiece(new Position(row, 6), new Knight(color));
+                    yield return new PlacedPiece(new Position(row, 7), new Rook(color));
+                }
+
+                
+
             }
 
             IEnumerable<PlacedPiece> makePawns(int row, Color color) =>
